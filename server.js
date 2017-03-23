@@ -17,7 +17,9 @@ app.get('/:id', (req,res) => {
             } else {
                 res.send("Connection established to", url);
             }
-            db.close();
+            db.close((err) => {
+                if(err) console.log(err);
+            });
         });
     }
 });
