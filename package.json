@@ -1,0 +1,29 @@
+{
+  "name": "url-microservice",
+  "version": "1.0.0",
+  "description": "A microservice that shortens URLs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asitaru/urlMicroservice.git"
+  },
+  "keywords": [
+    "heroku"
+  ],
+  "author": "Andrei Sitaru",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asitaru/urlMicroservice/issues"
+  },
+  "homepage": "https://github.com/asitaru/urlMicroservice#readme",
+  "engines": {
+    "node": "7.6.0"
+},
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
