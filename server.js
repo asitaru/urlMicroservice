@@ -13,11 +13,25 @@ app.get('/:id', (req,res) => {
     } else {
         mongodb.connect(url, (err,db) => {
             if(err) {
-                res.send(JSON.stringify({error: "Could not connect to DB, try again later!"}, null, " "));
+                res.send(JSON.stringify({error: "Could not connect to DB, try again later!"}));
             } else {
-                res.send("Connection established to", url);
+                db.collection('url')
+                    .find({
+                        short_url: parseInt(req.params.id)
+                    })
+                    .toArray((err,result) => {
+                        if(err) {
+                            res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+                            db.close();
+                        } else if (result.length) {
+                            console.log(result);
+                            res.redirect(result[0].original_url);
+                            db.close();
+                        }else {
+                            res.end(JSON.stringify({error: "This URL is not in the DB"}));
+                        }
+                    })
             }
-            db.close();
         });
     }
 });
@@ -31,7 +45,7 @@ app.get('/new/*', (req, res) => {
                     original_url: req.params[0]
                 })
                 .toArray((err, result) => {
-                    if (err) throw err
+                    if (err) console.log(err);
                     if (result.length) {
                         result[0].short_url = "https://url-shorten-microservice.herokuapp.com/" +
                             result[0].short_url;
