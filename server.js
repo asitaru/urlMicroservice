@@ -26,11 +26,32 @@ app.get('/:id', (req,res) => {
 
 app.get('/new/*', (req,res) => {
     if (validUrl.isUri(req.params[0])){
-        let output = {
-            original_url: req.params[0],
-            short_url: "https://url-shorten-microservice.herokuapp.com/"
-        }
-        res.send(JSON.stringify(output, null, " "));
+        mongodb.connect(url, (err,db) => {
+            if(err) console.log(err);
+            db.collection('url')
+                .find({original_url: req.params[0]})
+                .toArray((err,result) => {
+                    if(err) throw err
+                    if(result.length){
+                        result[0].short_url =  "https://url-shorten-microservice.herokuapp.com/" + result[0].short_url;
+                        res.send(JSON.stringify(result[0], null, " "));
+                    } else {
+                        let max = db.collection('url').find().sort({short_url: -1}).limit(1).pretty().short_url || 0;
+                        let obj = {
+                            original_url: req.params[0],
+                            short_url: parseInt(max) + 1
+                        };
+                        db.collection('url')
+                            .insert(obj, (err,data) => {
+                                if(err) console.log(err);
+                                res.send(JSON.stringify(obj, null, " "));
+                            });
+                    }
+                });
+            db.close(err){
+                if(err) console.log(err);
+            }
+        });
     } else {
         res.send(JSON.stringify({error: "Wrong url format, make sure you have a valid protocol and real site."}, null, " "));
     }
