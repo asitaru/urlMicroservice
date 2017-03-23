@@ -48,9 +48,7 @@ app.get('/new/*', (req,res) => {
                             });
                     }
                 });
-            db.close(err){
-                if(err) console.log(err);
-            }
+            db.close();
         });
     } else {
         res.send(JSON.stringify({error: "Wrong url format, make sure you have a valid protocol and real site."}, null, " "));
