@@ -22,8 +22,10 @@
   "homepage": "https://github.com/asitaru/urlMicroservice#readme",
   "engines": {
     "node": "7.6.0"
-},
+  },
   "dependencies": {
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "mongodb": "^2.2.25",
+    "valid-url": "^1.0.9"
   }
 }
