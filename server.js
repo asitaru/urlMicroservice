@@ -22,30 +22,34 @@ app.get('/:id', (req,res) => {
     }
 });
 
-app.get('/new/*', (req,res) => {
-    if (validUrl.isUri(req.params[0])){
-        mongodb.connect(url, (err,db) => {
-            if(err) console.log(err);
+app.get('/new/*', (req, res) => {
+    if (validUrl.isUri(req.params[0])) {
+        mongodb.connect(url, (err, db) => {
+            if (err) console.log(err);
             db.collection('url')
-                .find({original_url: req.params[0]})
-                .toArray((err,result) => {
-                    if(err) throw err
-                    if(result.length){
-                        result[0].short_url =  "https://url-shorten-microservice.herokuapp.com/"
-                                                + result[0].short_url;
+                .find({
+                    original_url: req.params[0]
+                })
+                .toArray((err, result) => {
+                    if (err) throw err
+                    if (result.length) {
+                        result[0].short_url = "https://url-shorten-microservice.herokuapp.com/" +
+                            result[0].short_url;
                         res.send(JSON.stringify({
                             original_url: result[0].original_url,
                             short_url: result[0].short_url
-                        },null, " "));
+                        }, null, " "));
                         db.close();
                     } else {
                         var max;
                         db.collection('url')
                             .find()
-                            .sort({short_url: -1})
+                            .sort({
+                                short_url: -1
+                            })
                             .limit(1)
-                            .toArray((err,result) => {
-                                if(err) console.log(err);
+                            .toArray((err, result) => {
+                                if (err) console.log(err);
                                 console.log(result[0].short_url)
                                 max = parseInt(result[0].short_url);
                                 var obj = {
@@ -53,8 +57,8 @@ app.get('/new/*', (req,res) => {
                                     short_url: max + 1
                                 };
                                 db.collection('url')
-                                    .insert(obj, (err,data) => {
-                                        if(err) console.log(err);
+                                    .insert(obj, (err, data) => {
+                                        if (err) console.log(err);
                                         res.send(JSON.stringify({
                                             original_url: obj.original_url,
                                             short_url: obj.short_url
@@ -67,7 +71,9 @@ app.get('/new/*', (req,res) => {
                 });
         });
     } else {
-        res.send(JSON.stringify({error: "Wrong url format, make sure you have a valid protocol and real site."}, null, " "));
+        res.send(JSON.stringify({
+            error: "Wrong url format, make sure you have a valid protocol and real site."
+        }, null, " "));
     }
 });
 
