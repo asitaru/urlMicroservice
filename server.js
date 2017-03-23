@@ -7,6 +7,13 @@ let app=express();
 
 app.set('port', (process.env.PORT || 5000));
 
+app.use('/node_modules', express.static(__dirname + "/node_modules"));
+app.use('/', express.static(__dirname));
+
+app.get('/', (req,res) => {
+    res.sendFile('index.html');
+});
+
 app.get('/:id', (req,res) => {
     if(isNaN(req.params.id)) {
         res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
