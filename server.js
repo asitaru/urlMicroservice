@@ -17,9 +17,7 @@ app.get('/:id', (req,res) => {
             } else {
                 res.send("Connection established to", url);
             }
-            db.close((err) => {
-                if(err) console.log(err);
-            });
+            db.close();
         });
     }
 });
@@ -36,10 +34,23 @@ app.get('/new/*', (req,res) => {
                         result[0].short_url =  "https://url-shorten-microservice.herokuapp.com/" + result[0].short_url;
                         res.send(JSON.stringify(result[0], null, " "));
                     } else {
-                        let max = db.collection('url').find().sort({short_url: -1}).limit(1).pretty().short_url || 0;
+                        let max;
+                        db.collection('url')
+                            .find()
+                            .sort({short_url: -1})
+                            .limit(1)
+                            .pretty()
+                            .toArray((err,result) => {
+                                if(err) throw err;
+                                if(result.length) {
+                                    max = parseInt(result[0].short_url);
+                                } else {
+                                    max = 0;
+                                }
+                            })
                         let obj = {
                             original_url: req.params[0],
-                            short_url: parseInt(max) + 1
+                            short_url: max + 1
                         };
                         db.collection('url')
                             .insert(obj, (err,data) => {
