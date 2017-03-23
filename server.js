@@ -40,13 +40,10 @@ app.get('/new/*', (req,res) => {
                             .sort({short_url: -1})
                             .limit(1)
                             .toArray((err,result) => {
-                                if(err) throw err;
-                                if(result.length) {
-                                    max = parseInt(result[0].short_url);
-                                } else {
-                                    max = 0;
-                                }
+                                if(err) console.log(err);
+                                max = parseInt(result[0].short_url);
                             })
+                            console.log(max);
                         let obj = {
                             original_url: req.params[0],
                             short_url: max + 1
