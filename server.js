@@ -39,7 +39,6 @@ app.get('/new/*', (req,res) => {
                             .find()
                             .sort({short_url: -1})
                             .limit(1)
-                            .pretty()
                             .toArray((err,result) => {
                                 if(err) throw err;
                                 if(result.length) {
