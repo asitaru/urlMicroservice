@@ -14,21 +14,24 @@ app.get('/', (req,res) => {
     res.sendFile('index.html');
 });
 
+let handleError = () => {
+    res.send(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+}
+
 app.get('/:id', (req,res) => {
     if(isNaN(req.params.id)) {
         res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
     } else {
         mongodb.connect(url, (err,db) => {
-            if(err) {
-                res.send(JSON.stringify({error: "Could not connect to DB, try again later!"}));
-            } else {
+            if(err) handleError();
+            else {
                 db.collection('url')
                     .find({
                         short_url: parseInt(req.params.id)
                     })
                     .toArray((err,result) => {
                         if(err) {
-                            res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+                            handleError()
                             db.close();
                         } else if (result.length) {
                             console.log(result);
@@ -46,15 +49,14 @@ app.get('/:id', (req,res) => {
 app.get('/new/*', (req, res) => {
     if (validUrl.isUri(req.params[0])) {
         mongodb.connect(url, (err, db) => {
-            if (err) res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+            if (err) handleError();
             db.collection('url')
                 .find({
                     original_url: req.params[0]
                 })
                 .toArray((err, result) => {
-                    if (err) {
-                        res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
-                    }else if (result.length) {
+                    if (err) handleError()
+                    else if (result.length) {
                         result[0].short_url = "https://url-shorten-microservice.herokuapp.com/" +
                             result[0].short_url;
                         res.send(JSON.stringify({
@@ -71,9 +73,8 @@ app.get('/new/*', (req, res) => {
                             })
                             .limit(1)
                             .toArray((err, result) => {
-                                if (err) {
-                                    res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
-                                }else{
+                                if (err) handleError()
+                                else{
                                     console.log(result[0].short_url)
                                     max = parseInt(result[0].short_url);
                                     var obj = {
@@ -83,7 +84,7 @@ app.get('/new/*', (req, res) => {
                                 };
                                 db.collection('url')
                                     .insert(obj, (err, data) => {
-                                        if (err) res.end(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+                                        if (err) handleError()
                                         res.send(JSON.stringify({
                                             original_url: obj.original_url,
                                             short_url: "https://url-shorten-microservice.herokuapp.com/" + obj.short_url
