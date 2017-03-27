@@ -43,7 +43,7 @@ app.get('/:id', (req,res) => {
         //             })
         //     }
         // });
-        let query = parseInt(req.params.id);
+        var query = parseInt(req.params.id);
         mongodb.connect(url)
             .then( db => db.collection('url').find({short_url: query}).toArray())
             .then( result => result[0].original_url)
