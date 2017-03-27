@@ -14,35 +14,42 @@ app.get('/', (req,res) => {
     res.sendFile('index.html');
 });
 
-let handleError = () => {
-    res.send(JSON.stringify({error: "Could not connect to DB, try again later!"}));
+let handleError = error => {
+    res.send(JSON.stringify({error: error}));
 }
 
 app.get('/:id', (req,res) => {
     if(isNaN(req.params.id)) {
         res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
     } else {
-        mongodb.connect(url, (err,db) => {
-            if(err) handleError();
-            else {
-                db.collection('url')
-                    .find({
-                        short_url: parseInt(req.params.id)
-                    })
-                    .toArray((err,result) => {
-                        if(err) {
-                            handleError()
-                            db.close();
-                        } else if (result.length) {
-                            console.log(result);
-                            res.redirect(result[0].original_url);
-                            db.close();
-                        }else {
-                            res.end(JSON.stringify({error: "This URL is not in the DB"}));
-                        }
-                    })
-            }
-        });
+        // mongodb.connect(url, (err,db) => {
+        //     if(err) handleError();
+        //     else {
+        //         db.collection('url')
+        //             .find({
+        //                 short_url: parseInt(req.params.id)
+        //             })
+        //             .toArray((err,result) => {
+        //                 if(err) {
+        //                     handleError()
+        //                     db.close();
+        //                 } else if (result.length) {
+        //                     console.log(result);
+        //                     res.redirect(result[0].original_url);
+        //                     db.close();
+        //                 }else {
+        //                     res.end(JSON.stringify({error: "This URL is not in the DB"}));
+        //                 }
+        //             })
+        //     }
+        // });
+        let query = parseInt(req.params.id);
+        mongodb.connect(url)
+            .then( db => db.collection('url').find({short_url: query}).toArray())
+            .then( result => result[0].original_url)
+            .then(res.redirect())
+            .catch(handleError())
+            .finally(db.close());
     }
 });
 
