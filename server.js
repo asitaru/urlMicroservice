@@ -14,42 +14,24 @@ app.get('/', (req,res) => {
     res.sendFile('index.html');
 });
 
-let handleError = error => {
+let handleError = function(error) {
     res.send(JSON.stringify({error: error}));
 }
 
+//Finding the URL in the database, if nothing found sends an error object to the response
 app.get('/:id', (req,res) => {
     if(isNaN(req.params.id)) {
-        console.log(true);
         res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
     } else {
-        mongodb.connect(url, (err,db) => {
-            if(err) handleError();
-            else {
-                db.collection('url')
-                    .find({
-                        short_url: parseInt(req.params.id)
-                    })
-                    .toArray((err,result) => {
-                        if(err) {
-                            handleError()
-                            db.close();
-                        } else if (result.length) {
-                            console.log(result);
-                            res.redirect(result[0].original_url);
-                            db.close();
-                        }else {
-                            res.end(JSON.stringify({error: "This URL is not in the DB"}));
-                        }
-                    })
-            }
-        });
-        // var query = parseInt(req.params.id);
-        // mongodb.connect(url)
-        //     .then( db => db.collection('url').find({short_url: query}).toArray())
-        //     .then( result => result[0].original_url)
-        //     .then(res.redirect())
-        //     .catch(console.log)
+        var query = parseInt(req.params.id);
+        mongodb.connect(url)
+            .then( db => db.collection('url').find({short_url: query}).toArray())
+            .then( result => {
+                if(result.length){
+                    res.redirect(result[0].original_url)
+                } else throw "This URL is not in the database";
+            })
+            .catch(error => res.end(JSON.stringify({error: error})))
     }
 });
 
