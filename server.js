@@ -20,6 +20,7 @@ let handleError = error => {
 
 app.get('/:id', (req,res) => {
     if(isNaN(req.params.id)) {
+        console.log(true);
         res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
     } else {
         // mongodb.connect(url, (err,db) => {
