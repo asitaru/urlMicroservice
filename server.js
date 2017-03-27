@@ -48,8 +48,7 @@ app.get('/:id', (req,res) => {
             .then( db => db.collection('url').find({short_url: query}).toArray())
             .then( result => result[0].original_url)
             .then(res.redirect())
-            .catch(handleError())
-            .finally(db.close());
+            .catch(console.log)
     }
 });
 
