@@ -31,18 +31,29 @@ app.get('/:id', (req,res) => {
     }
 });
 
+function getResponseObject(result) {
+    if (Array.isArray(result)) {
+        return {
+            original_url: result[0].original_url,
+            short_url: "https://url-shorten-microservice.herokuapp.com/" + result[0].short_url
+        }
+    } else {
+        return {
+            original_url: result.original_url,
+            short_url: "https://url-shorten-microservice.herokuapp.com/" + result.short_url
+        }
+    }
+}
+
 app.get('/new/*', (req, res) => {
     if (validUrl.isUri(req.params[0])) {
         mongodb.connect(url)
             .then(db => {
                 //Checks if the URL is already in the database
-                let resultObject = {};
                 db.collection('url').find({original_url: req.params[0]}).toArray()
                     .then( result => {
                         if(result.length) {
-                            resultObject.original_url = result[0].original_url;
-                            resultObject.short_url = `https://url-shorten-microservice.herokuapp.com/${result[0].short_url}`;
-                            res.send(JSON.stringify(resultObject, null, " "));
+                            res.send(JSON.stringify(getResponseObject(result), null, " "));
                         } else {
                             //If it's not, the URL will get inserted on the last position
                             db.collection('url').find().sort({short_url: -1}).limit(1).toArray()
@@ -54,10 +65,7 @@ app.get('/new/*', (req, res) => {
                                             return resultObject
                                 })
                                 .then(resultObject => {
-                                    res.send(JSON.stringify({
-                                        original_url: resultObject.original_url,
-                                        short_url:  `https://url-shorten-microservice.herokuapp.com/${resultObject.short_url}`
-                                    }, null, " "));
+                                    res.send(JSON.stringify(getResponseObject(resultObject), null, " "));
                                 })
                         }
                     })
