@@ -14,20 +14,6 @@ app.get('/', (req,res) => {
     res.sendFile('index.html');
 });
 
-//Finds the URL in the database, if nothing found sends an error object to the response
-app.get('/:id', (req,res) => {
-    if(isNaN(req.params.id)) {
-        res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
-    } else {
-        var query = parseInt(req.params.id);
-        mongodb.connect(url)
-            .then( db => findUrl(db, {short_url: query}))
-            .then( result => res.redirect(result[0].original_url),
-                () => new Error("This URL is not in the database"))
-            .catch(error => res.end(JSON.stringify({error: error})))
-    }
-});
-
 function getResponseObject(result) {
     if (Array.isArray(result)) {
         return {
@@ -54,6 +40,20 @@ function findUrl( db, query){
     })
 }
 
+//Finds the URL in the database, if nothing found sends an error object to the response
+app.get('/:id', (req,res) => {
+    if(isNaN(req.params.id)) {
+        res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
+        return
+    }
+    var query = parseInt(req.params.id);
+    mongodb.connect(url)
+        .then( db => findUrl(db, {short_url: query}))
+        .then( result => res.redirect(result[0].original_url),
+            () => new Error("This URL is not in the database"))
+        .catch(error => res.end(JSON.stringify({error: error})))
+});
+
 app.get('/new/*', (req, res) => {
     if (!validUrl.isUri(req.params[0])) {
         res.send(JSON.stringify({
@@ -61,6 +61,7 @@ app.get('/new/*', (req, res) => {
         }, null, " "));
         return
     }
+
     mongodb.connect(url)
         .then(db => {
             //Checks if the URL is already in the database
