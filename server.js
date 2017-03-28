@@ -21,12 +21,9 @@ app.get('/:id', (req,res) => {
     } else {
         var query = parseInt(req.params.id);
         mongodb.connect(url)
-            .then( db => db.collection('url').find({short_url: query}).toArray())
-            .then( result => {
-                if(result.length){
-                    res.redirect(result[0].original_url)
-                } else throw "This URL is not in the database";
-            })
+            .then( db => findUrl(db, {short_url: query}))
+            .then( result => res.redirect(result[0].original_url),
+                () => new Error("This URL is not in the database"))
             .catch(error => res.end(JSON.stringify({error: error})))
     }
 });
@@ -45,9 +42,9 @@ function getResponseObject(result) {
     }
 }
 
-function findUrl(query){
-    let promise = new Promise((resolve, reject) => {
-        db.collection.find(query).toArray().then(result => {
+function findUrl( db, query){
+    return new Promise(function(resolve, reject) {
+        db.collection('url').find(query).toArray((err,result) => {
             if(result.length) {
                 resolve(result);
             } else {
@@ -55,7 +52,6 @@ function findUrl(query){
             }
         })
     })
-    return promise;
 }
 
 app.get('/new/*', (req, res) => {
@@ -68,9 +64,10 @@ app.get('/new/*', (req, res) => {
     mongodb.connect(url)
         .then(db => {
             //Checks if the URL is already in the database
-            findUrl({original_url: req.params[0]})
-                .then( result => res.send(JSON.stringify(getResponseObject(result), null, " ")))
-                .catch(reject => {
+            findUrl(db, {original_url: req.params[0]})
+                .then( result => res.send(JSON.stringify(getResponseObject(result), null, " ")),
+                () => {
+                    console.log(reject)
                     db.collection('url').find().sort({short_url: -1}).limit(1).toArray()
                         .then( result => parseInt(result[0].short_url))
                         .then( maxValue => resultObject = {original_url: req.params[0], short_url: maxValue + 1})
