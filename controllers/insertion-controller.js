@@ -2,12 +2,14 @@ const validUrl = require('valid-url');
 const databaseController = require('./database-controller');
 
 function getResponseObject(result) {
-    if(result instanceof Error) return {error: result}
+    if (result instanceof Error) return {
+        error: result
+    }
     result.short_url = "https://url-shorten-microservice.herokuapp.com/" + result.short_url;
     return result;
 }
 
-module.exports = (req,res) => {
+module.exports = (req, res) => {
 
     if (!validUrl.isUri(req.params[0])) {
         res.send(JSON.stringify({
@@ -17,5 +19,5 @@ module.exports = (req,res) => {
     }
 
     databaseController.retriveInsertion(req.params[0])
-        .then( result => res.send(JSON.stringify(getResponseObject(result), null, " ")))
+        .then(result => res.send(JSON.stringify(getResponseObject(result), null, " ")))
 }
