@@ -2,9 +2,9 @@ const databaseController = require('./database-controller');
 
 function redirectTo(res, linkObject){
     if(Object.is(linkObject, null)) {
-        res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
+        res.json({error: "This URL is not in DB"})
     } else if(linkObject instanceof Error){
-        res.send(JSON.stringify({error: linkObject}, null, " "));
+        res.json({error: linkObject});
     } else {
         res.redirect(linkObject.original_url);
     }
@@ -13,7 +13,7 @@ function redirectTo(res, linkObject){
 module.exports = (req,res) => {
 
     if(isNaN(req.params.id)) {
-        res.send(JSON.stringify({error: "This URL is not in DB"}, null, " "));
+        res.json({error: "This URL is not in DB"});
         return
     }
 
